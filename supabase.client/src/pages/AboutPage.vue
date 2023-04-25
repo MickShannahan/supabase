@@ -33,6 +33,7 @@
 import { marked } from 'marked'
 import { logger } from '../utils/Logger.js';
 import { onBeforeMount, onMounted, ref } from 'vue';
+import hjs from 'highlight.js'
 const content = ref('')
 const links = ref([])
 onBeforeMount(() => {
@@ -41,6 +42,7 @@ onBeforeMount(() => {
 onMounted(() => {
   setTimeout(attachCopy, 500)
   setTimeout(createNav, 500)
+  setTimeout(highLightCode, 500)
 })
 async function loadMarkdown() {
   try {
@@ -76,6 +78,13 @@ function createNav() {
 
 function scrollTo(id) {
   document.querySelector(id).scrollIntoView()
+}
+
+function highLightCode() {
+  let blocks = document.querySelectorAll('pre')
+  blocks.forEach(b => {
+    hjs.highlightBlock(b)
+  })
 }
 </script>
 
@@ -181,7 +190,7 @@ pre {
   border-radius: 8px;
   padding: 5px;
   padding-left: 1em;
-  color: var(--bs-warning);
+  // color: var(--bs-warning);
 }
 
 .fade-in {

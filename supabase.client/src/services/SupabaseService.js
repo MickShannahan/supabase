@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabasePublicKey, supabaseUrl } from "../env.js";
 import { logger } from "../utils/Logger.js";
 import Pop from "../utils/Pop.js";
+import { AppState } from "../AppState.js";
 
 const seconds = 1000
 const minutes = 60 * seconds
@@ -32,8 +33,8 @@ class SupabaseService {
           }
         }
       })
-      // call on load
-      this.list('mick')
+      //  things to call when supabase is initialized, like listing all files a user has uploaded
+      this.list(AppState.account.id)
     } catch (error) {
       logger.log(error)
     }
