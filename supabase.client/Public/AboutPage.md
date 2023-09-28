@@ -38,54 +38,65 @@ When that is done you should see your storage bucket in the list on the left
 
 Now we need to set up our auth0 so that it can sign a `JWT` (json web token) that supabase can read and use to identify users accessing our storage bucket.  That way when someone logs into our website using Auth0 and gets a token for our api, they will also be given a token to interact with our supabase project.
 
-Head on over to the `auth pipeline` -> `rules` section page and make a new rule, selecting `empty rule` when prompted
-![auth rule button](/imgs/auth0-create-rule.png)
+Head on over to the `Actions` -> `Library` page and click the `Build Custom` button. Name what you want and make sure `Login/Post Login` is selected
 
-There will be some code there already that we can erase. Copy the code block below and paste it into our rule. Then, rename the rule and save it.
+There will be some code there already that we can erase. Copy the code block below and paste it into our action. Then click the `Deploy` button.
 
 ```javascript
-function supaBaseToken(user, context, callback) {
   let jsonwt = require('jsonwebtoken@7.1.9');
-	let supaSecret = 	'<SUPABASE JWT SECERET>'; // REPLACE WITH JWT TOKEN
+	let supaSecret = 	'<SUPABASE JWT SECRET>';
+/**
+* Handler that will be called during the execution of a PostLogin flow.
+*
+* @param {Event} event - Details about the user and the context in which they are logging in.
+* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.
+*/
+exports.onExecutePostLogin = async (event, api) => {
+	event.user.app_metadata = event.user.app_metadata || {};
   
-	user.app_metadata = user.app_metadata || {};
-  const meta = user.app_metadata;
-  
+  const meta = event.user.app_metadata;
   let expires = Math.floor(Date.now() / 1000) + 60 * 60;
+
+  meta.supabase = meta.supabase || {};
+  if(meta.supabase.exp > Date.now()){
+  	return; // exit if token not expired
+  }
+
 	let payload = {
   userId: meta.id || meta.user_id,
   exp: expires
 	};
   
-  meta.supabase = meta.supabase || {};
-  if(meta.supabase.exp > Date.now()){
-  	return callback(null, user, context); // exit if token not expired
-  }
- 
   meta.supabase.exp = expires;
  	meta.supabase.token = jsonwt.sign(payload, supaSecret); // set to meta to save for later
-  context.idToken.supabase = {
+  const tokenData = {
     token: meta.supabase.token,
     exp: expires
-  };
-    auth0.users.updateAppMetadata(user.user_id, user.app_metadata)
-        .then(function () {
-            callback(null, user, context);
-        })
-        .catch(function (err) {
-            callback(err);
-        });  
-  
-  return callback(null, user, context);
-}
+  }
+  api.user.setAppMetadata('supabase', tokenData);
+  api.idToken.setCustomClaim('supabase',tokenData);
+};
+
+/**
+* Handler that will be invoked when this action is resuming after an external redirect. If your
+* onExecutePostLogin function does not perform a redirect, this function can be safely ignored.
+*
+* @param {Event} event - Details about the user and the context in which they are logging in.
+* @param {PostLoginAPI} api - Interface whose methods can be used to change the behavior of the login.
+*/
+// exports.onContinuePostLogin = async (event, api) => {
+// };
+
 
 ```
 
-⚠️ In this rule near the top, there is a string with `<SUPABASE JWT SECERET>` this (including the carrots) needs to be replaced with our `JWT token` from supabase (you can find this in your `project settings` -> `api` tab)
+⚠️ In this action near the top, there is a string with `<SUPABASE JWT SECERET>` this (including the carrots) needs to be replaced with our `JWT token` from supabase (you can find this in your `project settings` -> `api` tab)
 
 ![supabase jwt token](/imgs/supabase-jwt-secret.png)
 
-To simply explain this rule, it takes the secret token from supabase and signs us a token with our user's information on it that allows our users to access our api (similar to how Auth0 signs a bearer token on sign-in). This one, however, is signs in a way that supabase can read. The token gets added to our userInfo that comes back when we normally log in. You can see it now if you log into one of your sites and checking the newly added `supabase` property.
+There is one last step now that we have deployed action, we need to add it into our login flow. Clicking on the `Actions` -> `Flows` tab will bring us to a page that has several options. We want `Login`. You should see a flow chart like grid with a `Actions` menu on the right. Under the custom tab, we should see our action we just deployed. Drag this action into the flow line up. If you have other actions in the flow you shouldn't need to worry about order.
+
+To simply explain this flow action, it takes the secret token from supabase and signs us a token with our user's information on it that allows our users to access our api (similar to how Auth0 signs a bearer token on sign-in). This one, however, is signs in a way that supabase can read. The token gets added to our userInfo that comes back when we normally log in. You can see it now if you log into one of your sites and checking the newly added `supabase` property.
 
 ![user token](/imgs/user-token.png)
 
