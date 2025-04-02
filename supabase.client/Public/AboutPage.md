@@ -1,5 +1,5 @@
 
-# File Upload with supabase ![supabase_logo](/imgs/supabase-logo-icon_1.png)
+# File Upload with supabase ![supabase_logo](./imgs/supabase-logo-icon_1.png)
 
 
 supabase is a lot of things from  a file storage database to an edge functions service, an Auth provider, and a PostgreSQL server. supabase's way of storing all of it's data into tables makes it a free, easy, and flexible solution for storing and accessing information. We are going to use supabase for its file storage and set it up in a way that allows us to write rules that our users from Auth0 will have to abide by. Get started by creating an account with supabase [HERE](https://supabase.com) and confirming your email. You can also sign up using your GitHub account. You will also want to log into your Auth0 account, as we will make some changes to our auth rules there too.
@@ -9,17 +9,17 @@ supabase is a lot of things from  a file storage database to an edge functions s
 Once signed up and after your email is confirmed, you should land on the "projects" page. You won't have any right now, so let's make one. This project can hold many storage “buckets” for lots of different applications, so name it something generic like “sandbox.”
 
 
-![new_project](/imgs/new-project.png)
+![new_project](./imgs/new-project.png)
 
 
 Name your project and give it a secure password. Note that is isn't the password for your supabase account but the password you’ll use to access your *database* later on. Select a region close to you, and we will of course stick with the free option, since we like free.
-![create-project](/imgs/create-project.png)
+![create-project](./imgs/create-project.png)
 
 Once we create our project, we should be navigated to "projects setting" page while  the project is being set up. It only sits here while the project is being built and might navigate you away once it is complete. You can always get back to this settings page by hitting the `cog` at the bottom of the navigation menu on the left.
 
 ## subase Tokens 
 
-![supabase_tokens](/imgs/secrets.png)
+![supabase_tokens](./imgs/secrets.png)
 
 There are some tokens here we are going to want to use for our app so let's re-open this page in a new tab by clicking the settings cog in the left-hand nav menu and click “Api”.
 
@@ -27,12 +27,12 @@ There are some tokens here we are going to want to use for our app so let's re-o
 
 Back on the main page, navigate to the storage tab in the left-hand nav (it looks like a little storage box) and create a new storage "bucket". Name it whatever you would like, and turn "public" on. You can change this later, but this makes it so anyone can read data from our storage, which we want for now.
 
-![inline_small_nav-storage](/imgs/nav-storage.png)
-![inline_w_75_create storage bucket](/imgs/new-storage.png)
+![inline_small_nav-storage](./imgs/nav-storage.png)
+![inline_w_75_create storage bucket](./imgs/new-storage.png)
 
 When that is done you should see your storage bucket in the list on the left
 
-![w_50_ list of storage buckets](/imgs/bucket-list.png)
+![w_50_ list of storage buckets](./imgs/bucket-list.png)
 
 ## Auth0 Rule
 
@@ -92,13 +92,13 @@ exports.onExecutePostLogin = async (event, api) => {
 
 ⚠️ In this action near the top, there is a string with `<SUPABASE JWT SECERET>` this (including the carrots) needs to be replaced with our `JWT token` from supabase (you can find this in your `project settings` -> `api` tab)
 
-![supabase jwt token](/imgs/supabase-jwt-secret.png)
+![supabase jwt token](./imgs/supabase-jwt-secret.png)
 
 There is one last step now that we have deployed action, we need to add it into our login flow. Clicking on the `Actions` -> `Flows` tab will bring us to a page that has several options. We want `Login`. You should see a flow chart like grid with a `Actions` menu on the right. Under the custom tab, we should see our action we just deployed. Drag this action into the flow line up. If you have other actions in the flow you shouldn't need to worry about order.
 
 To simply explain this flow action, it takes the secret token from supabase and signs us a token with our user's information on it that allows our users to access our api (similar to how Auth0 signs a bearer token on sign-in). This one, however, is signs in a way that supabase can read. The token gets added to our userInfo that comes back when we normally log in. You can see it now if you log into one of your sites and checking the newly added `supabase` property.
 
-![user token](/imgs/user-token.png)
+![user token](./imgs/user-token.png)
 
 ## supabase Token Reader
 
@@ -141,7 +141,7 @@ We are almost done with setting up our supabase so that users can start uploadin
 
 Head back over to the `storage` tab and click on `configuration` -> `politices`. Here we should see our storage bucket, and we are going to click the `new policy` button and `create a policy from scratch` (For full customization).
 
-![new policy](/imgs/supabase-new-policy.png)
+![new policy](./imgs/supabase-new-policy.png)
 
 In the dialogue window that pops up, name your policy, then check each of the following: `SELECT`, `INSERT`, `UPDATE`, `DELETE`. In the `policy definition` delete the code that’s already there and paste in this bit of code. Don’t change the target roles.
 
@@ -152,7 +152,7 @@ In the dialogue window that pops up, name your policy, then check each of the fo
 This bit of code will access the user Id function we added earlier to our SQL tables to get the id off the request and compare it against any of our items' user_id;
 The dialogue should look something like this
 
-![new policy dialogue](/imgs/supabase-policy-details.png)
+![new policy dialogue](./imgs/supabase-policy-details.png)
 
 Click `review`, then `save policy` on the next dialogue window.  This should create 4 policies under the `storage.objects` policy section.
 
@@ -169,11 +169,11 @@ If you look inside your package.json, you should now see supabase as a dependenc
 
 Next head over to your env.js and add two variables to be exported. One for our supabase project url, and one for our supabase public api key.
 
-![env.js new exports](/imgs/envJs-add.png)
+![env.js new exports](./imgs/envJs-add.png)
 
 Enter these values. You can find them in the `Project settings` -> `API` tab.
 
-![supabase api tokens](/imgs/supabase-url.png)
+![supabase api tokens](./imgs/supabase-url.png)
 
 ## supabase Service
 
@@ -196,7 +196,7 @@ In the code for [this project](https://github.com/MickShannahan/supabase), there
   - The first is the name of your storage bucket, ours in this project is called 'sandbox'. 
   - The Second argument will need to be the supabase token that our Auth0 rule signed. That token gets attached to the userInfo object, so it should be accessible in the network tab on `user` at this point.
 
-  ![initalize supabase 10_vh_](/imgs/supabase-init.png)
+  ![initalize supabase 10_vh_](./imgs/supabase-init.png)
 
   > Our `init` function will use that bucket name and token along with the site url and public api key we added in our env.js to connect with supabase, so make sure all of that is filled in before we try to init.
 
@@ -231,7 +231,7 @@ The supabase url will contain the file information we passed from the form, as w
 
 You will also need to backward engineer a way to delete the polaroid not only from your api, but also from your supabase folder and bucket. Start with removing the data from supabase. You will need the storage path information that includes the any folder names and the file name that will be removed using the supabaseService remove function. ex: `634844a08c9d1ba02348913d/cat-pictures/cuteCats.jpg'`.
 
-  ![create a polaroid w_100_](/imgs/polaroid-create.png)
+  ![create a polaroid w_100_](./imgs/polaroid-create.png)
 
 When we want to show the polaroids people have uploaded to the site nothing has really changed. We will still just get them from our api - our database still stores url strings to display the correct image, but now that is an image we are storing on supabase in our own project.
 
